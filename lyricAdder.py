@@ -42,7 +42,8 @@ def modifyChartFile(chart: list, syllables: list): #For every line, add the syll
     newChart = []
     for line in chart:
         if "lyric " in line:
-            newLine = line.replace("lyric ", "lyric {0}".format(syllables.pop(0)))
+            location = line.find("lyric")
+            newLine = line[:location] + "lyric {0}\"\n".format(syllables.pop(0))
             newChart.append(newLine)
         else:
             newChart.append(line)
