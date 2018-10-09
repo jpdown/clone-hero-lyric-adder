@@ -7,10 +7,9 @@ Takes in a .chart with lyric events placed and a text file with lyrics, creates 
 ## Usage
 Format your text file with spaces after every syllable and formatted the way Clone Hero expects. Example:
 ```
-Just a- ffects the ones a- round me
-When sin's deep in my blood
-You'll be the one to fall
-I wish I could be the one
+By the way of cos- mic rays
+Sub- tle break- down jarred the code dis- play
+A si- mu- la- tion as I can tell, our cell
 ```
 In the folder with the .chart file will be a new .chart file named `LYRIC<name>.chart`
 
