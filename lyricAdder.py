@@ -4,12 +4,14 @@
 # Contact me on Discord if you encounter any issues: PoisonedPanther#0001
 
 import os
+import traceback
+import sys
 
 def readFiles():
     chartPath = input("Please drag the chart file into this window and press enter:")
     lyricsPath = input("Please drag the lyrics file into this window and press enter:")
 
-    #Get rid of surrounding quotes on Windows
+    #Get rid of surrounding quotes if path has spaces
     if chartPath.startswith("\"") and chartPath.endswith("\""):
         chartPath = chartPath[1:-1]
     if lyricsPath.startswith("\"") and lyricsPath.endswith("\""):
@@ -39,20 +41,38 @@ def syllableGenerator(lyrics: list): #Takes in list of lines from lyric file, ge
     return syllables
 
 def modifyChartFile(chart: list, syllables: list): #For every line, add the syllable if line contains a lyric event
+    #Count the number of syllables in the case of running out of syllables
+    numSyllables = len(syllables)
+
     newChart = []
-    for line in chart:
-        if "lyric " in line:
-            location = line.find("lyric")
-            newLine = line[:location] + "lyric {0}\"\n".format(syllables.pop(0))
-            newChart.append(newLine)
-        else:
-            newChart.append(line)
+    try:
+        for line in chart:
+            if "lyric " in line:
+                location = line.find("lyric")
+                newLine = line[:location] + "lyric {0}\"\n".format(syllables.pop(0))
+                newChart.append(newLine)
+            else:
+                newChart.append(line)
+    except IndexError: #Too many lyric events, not enough syllables
+        print("There were too many lyric events in the chart, I ran out of syllables.")
+        #Count the number of lyric events in chart
+        numLyrics = 0
+        for line in chart:
+            if "lyric " in line:
+                numLyrics += 1
+        print("{0} syllables, {1} lyric events".format(numSyllables, numLyrics))
+        input("Press enter to continue writing the new chart, close me to skip writing the new file.")
     return newChart
 
 def writeNewChart(path: tuple, chart: list): #Write a new chart file, prepending the name with LYRIC
     with open("LYRIC" + path[1], "w") as newChart:
         for line in chart:
             newChart.write(line)
+
+def printException():
+    traceback.print_exc()
+    print("Please make an issue on the GitHub repo or message PoisonedPanther#0001 on Discord with this error message.")
+    input("Press enter to close...")
 
 def main():
     #Store old working directory
@@ -71,4 +91,7 @@ def main():
     input("Press enter to close...")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except:
+        printException()
