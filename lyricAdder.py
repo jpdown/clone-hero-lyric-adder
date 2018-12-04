@@ -8,13 +8,13 @@ import traceback
 import sys
 
 def readFiles():
-    chartPath = input("Please drag the chart file into this window and press enter:")
-    lyricsPath = input("Please drag the lyrics file into this window and press enter:")
+    chartPath = input("Please drag the chart file into this window and press enter:").strip()
+    lyricsPath = input("Please drag the lyrics file into this window and press enter:").strip()
 
     #Get rid of surrounding quotes if path has spaces
-    if chartPath.startswith("\"") and chartPath.endswith("\""):
+    if chartPath.startswith("\"") and chartPath.endswith("\"") or chartPath.startswith("'") and chartPath.endswith("'"):
         chartPath = chartPath[1:-1]
-    if lyricsPath.startswith("\"") and lyricsPath.endswith("\""):
+    if lyricsPath.startswith("\"") and lyricsPath.endswith("\"") or lyricsPath.startswith("'") and lyricsPath.endswith("'"):
        lyricsPath = lyricsPath[1:-1]
 
     #Separate files from paths to allow changing directory (due to windows having drive letters :angery:)
@@ -40,28 +40,36 @@ def syllableGenerator(lyrics: list): #Takes in list of lines from lyric file, ge
         syllables += line.split()
     return syllables
 
+def getNumLyricEvents(chart: list): #Takes in chart file, returns number of lyric events
+    numLyrics = 0
+    for line in chart:
+        if "lyric " in line:
+            numLyrics += 1
+    return numLyrics
+
+def getNumSyllables(syllables: list): #Takes in syllables list, returns length of list
+    return(len(syllables))
+
+def getConfirmation(chart: list, syllables: list):
+    print("Number of lyric events: " + str(getNumLyricEvents(chart)))
+    print("Number of syllables: " + str(getNumSyllables(syllables)))
+    option = input("Would you like to continue? (y/n)")
+    if(option.lower().startswith("y")):
+        return True
+    else:
+        return False
+
 def modifyChartFile(chart: list, syllables: list): #For every line, add the syllable if line contains a lyric event
     #Count the number of syllables in the case of running out of syllables
-    numSyllables = len(syllables)
-    tooManyEvents = False
-
     newChart = []
     for line in chart:
-        if "lyric " in line and not tooManyEvents:
+        if "lyric " in line:
             try:
                 location = line.find("lyric")
                 newLine = line[:location] + "lyric {0}\"\n".format(syllables.pop(0))
                 newChart.append(newLine)
             except IndexError: #Too many lyric events, not enough syllables
-                print("There were too many lyric events in the chart, I ran out of syllables.")
-                #Count the number of lyric events in chart
-                numLyrics = 0
-                for line in chart:
-                    if "lyric " in line:
-                        numLyrics += 1
-                print("{0} syllables, {1} lyric events".format(numSyllables, numLyrics))
-                input("Press enter to continue writing the new chart, close me to skip writing the new file.")
-                tooManyEvents = True #Allow program to write rest of chart
+                newChart.append(line)
         else:
             newChart.append(line)
     return newChart
@@ -82,14 +90,17 @@ def main():
 
     chart, lyrics, chartPath = readFiles()
     syllables = syllableGenerator(lyrics)
-    newChart = modifyChartFile(chart, syllables)
-    writeNewChart(chartPath, newChart)
+    if(getConfirmation(chart, syllables)):
+        newChart = modifyChartFile(chart, syllables)
+        writeNewChart(chartPath, newChart)
+        print("Done! You'll find your new chart file in the same location as your old chart")
+    else:
+        print("Cancelling, no new file will be written.")
     
     #Change back to old working directory
     os.chdir(workingDir)
 
     #End program
-    print("Done! You'll find your new chart file in the same location as your old chart")
     input("Press enter to close...")
 
 if __name__ == "__main__":
