@@ -11,6 +11,9 @@ By the way of cos- mic rays
 Sub- tle break- down jarred the code dis- play
 A si- mu- la- tion as I can tell, our cell
 ```
+
+Run `lyricAdder.py` with Python and follow all of the prompts.
+
 In the folder with the .chart file will be a new .chart file named `LYRIC<name>.chart`
 
 ## Troubleshooting
