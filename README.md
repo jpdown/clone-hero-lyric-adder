@@ -5,7 +5,7 @@
 Takes in a .chart with lyric events placed and a text file with lyrics, creates a new chart file with lyrics added.
 
 ## Usage
-Format your text file with spaces after every syllable and formatted the way Clone Hero expects. Example:
+Format your text file with spaces after every syllable, each new line being a phrase, and formatted the way Clone Hero expects. Example:
 ```
 By the way of cos- mic rays
 Sub- tle break- down jarred the code dis- play
