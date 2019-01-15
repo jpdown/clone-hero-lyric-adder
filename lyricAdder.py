@@ -153,10 +153,12 @@ def getNumSyllables(syllables: list): #Takes in syllables list, returns length o
 def getConfirmation(phrases: list, chartPhrases: list): #Prints number of syllables in each phrase, alerting user of potential errors
     if(len(phrases) > len(chartPhrases)):
         print("You have more phrases in the lyrics.txt than you do in the chart file")
+        print("lyrics.txt phrases: {0}, chart phrases: {1}".format(len(phrases), len(chartPhrases)))
         print("The following information is relating to the number of phrases in your chart file:")
         maxRange = len(chartPhrases)
     elif(len(chartPhrases) > len(phrases)):
         print("You have more phrases in the chart file than you do in the lyrics.txt")
+        print("lyrics.txt phrases: {0}, chart phrases: {1}".format(len(phrases), len(chartPhrases)))
         print("The following information is relating to the number of phrases in your lyrics file:")
         maxRange = len(phrases)
     else:
@@ -167,7 +169,7 @@ def getConfirmation(phrases: list, chartPhrases: list): #Prints number of syllab
     for i in range(maxRange):
         phraseLen = len(phrases[i])
         chartPhraseLen = len(chartPhrases[i])
-        s = "{0}: {1}, {2}: {3}".format(i+1, phraseLen, chartPhraseLen, phrases[i])
+        s = "{0}: {1}, {2}: {3}".format(i+1, chartPhraseLen, phraseLen, " ".join(phrases[i]))
         if phraseLen != chartPhraseLen:
             if isOk:
                 print("You have the following errors in your lyrics:")
@@ -236,7 +238,7 @@ def modifyLyrics(phrases: list, chartPhrases: list): #Takes the lyrics phrases a
     for phrase in range(len(phrases)): #both lists are same length
         for syllable in range(len(phrases[phrase])): #both lists are same length
             event = chartPhrases[phrase][syllable]
-            event.replace("lyric ", "lyric {0}".format(phrases[phrase][syllable]))
+            event = event.replace("lyric ", "lyric {0}".format(phrases[phrase][syllable]))
             events.append(event)
     return(events)
 
@@ -248,7 +250,7 @@ def replaceEvents(events: list, chart: list): #Replaces previous event list with
         if(line == eventsStartLine + 2):
             for event in events:
                 newChart.append(event)
-        if(line >= eventsStartLine and line < eventsEndLine):
+        if(line >= eventsStartLine + 2 and line < eventsEndLine):
             continue
         newChart.append(chart[line])
     
@@ -269,30 +271,27 @@ def main():
     #Store old working directory
     workingDir = os.getcwd()
 
-    configs = config.Config()
-    #Confirm config values are correct
-    configCorrect = False
-    while(not configCorrect):
-        configCorrect = confirmConfig(configs)
-        if(not configCorrect):
-            configs.generateConfig()
-    
-
-
     chart, lyrics, chartPath = readFiles()
     phrases = phraseGenerator(lyrics)
 
-    if(configs.lyricEventGeneratorsEnabled):
-        lyricEventChart = convertNotesToLyrics(chart, configs)
-    else:
-        lyricEventChart = chart
+    if(menu.getBooleanAnswer("Would you like to use signalling notes for lyric events? y/n: ")): #Ask user if they would like to use signalling notes
+        configs = config.Config()
+        #Confirm config values are correct
+        configCorrect = False
+        while(not configCorrect):
+            configCorrect = confirmConfig(configs)
+            if(not configCorrect):
+                configs.generateConfig()
+        
+        if(configs.lyricEventGeneratorsEnabled):
+            chart = convertNotesToLyrics(chart, configs)
 
     #Split lyric events in chart to phrases
-    events = splitEvents(lyricEventChart)
+    events = splitEvents(chart)
     chartPhrases, otherEvents = splitChartPhrases(events)
 
-    if(getConfirmation(chartPhrases, phrases)):
-        newChart = modifyChartFile(lyricEventChart, phrases, chartPhrases, otherEvents)
+    if(getConfirmation(phrases, chartPhrases)):
+        newChart = modifyChartFile(chart, phrases, chartPhrases, otherEvents)
         writeNewChart(chartPath, newChart)
         print("Done! You'll find your new chart file in the same location as your old chart")
     else:
