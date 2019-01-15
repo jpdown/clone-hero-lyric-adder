@@ -238,7 +238,8 @@ def modifyLyrics(phrases: list, chartPhrases: list): #Takes the lyrics phrases a
     for phrase in range(len(phrases)): #both lists are same length
         for syllable in range(len(phrases[phrase])): #both lists are same length
             event = chartPhrases[phrase][syllable]
-            event = event.replace("lyric ", "lyric {0}".format(phrases[phrase][syllable]))
+            lyricLocation = event.find("lyric")
+            event = event[:lyricLocation] + "lyric {0}\n".format(phrases[phrase][syllable])
             events.append(event)
     return(events)
 
